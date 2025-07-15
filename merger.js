@@ -1,11 +1,5 @@
 import Parser from 'rss-parser';
 import fs from 'fs';
-import { fileURLToPath } from 'url';
-import { dirname } from 'path';
-
-// Fix __dirname equivalent for ES Modules
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
 
 const newsSources = [
   {
@@ -42,34 +36,26 @@ async function generateFeed() {
   }));
 
   allItems.sort((a, b) => b.pubDate - a.pubDate);
-
-  const rssFeed = buildRss(allItems);
-  fs.writeFileSync(`${__dirname}/docs/merged-feed.rss`, rssFeed);
-}
-
-function buildRss(items) {
-  return `<?xml version="1.0"?>
+  
+  const rssFeed = `<?xml version="1.0"?>
 <rss version="2.0">
 <channel>
-  <title>Merged Business News</title>
-  <link>https://yourusername.github.io/my-merged-newsletters/</link>
+  <title>Merged Newsletters</title>
+  <link>https://github.com/yourusername/my-merged-newsletters</link>
   <description>Combined RSS feed</description>
   <lastBuildDate>${new Date().toUTCString()}</lastBuildDate>
-  ${items.map(item => `
+  ${allItems.map(item => `
   <item>
-    <title>${escapeXml(item.title)}</title>
-    <link>${escapeXml(item.link)}</link>
-    <guid>${escapeXml(item.link)}</guid>
+    <title>${item.title.replace(/[<>&]/g, '')}</title>
+    <link>${item.link}</link>
+    <guid>${item.link}</guid>
     <pubDate>${item.pubDate.toUTCString()}</pubDate>
-    <description>${escapeXml(item.description)}</description>
+    <description>${(item.description || '').replace(/[<>&]/g, '')}</description>
   </item>`).join('')}
 </channel>
 </rss>`;
-}
 
-function escapeXml(unsafe) {
-  return unsafe?.replace(/[<>&'"]/g, c => 
-    ({ '<':'&lt;', '>':'&gt;', '&':'&amp;', '\'':'&apos;', '"':'&quot;' }[c]));
+  fs.writeFileSync('./docs/merged-feed.rss', rssFeed);
 }
 
 await generateFeed();

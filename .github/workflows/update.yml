@@ -1,10 +1,9 @@
 name: Update Feed
 on:
   schedule:
-    - cron: '0 * * * *'  # Runs hourly
-  workflow_dispatch:     # Allow manual runs
+    - cron: '0 * * * *'
+  workflow_dispatch:
 
-# Add this permissions block
 permissions:
   contents: write
   pages: write
@@ -19,15 +18,17 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '20.x'
+          cache: 'npm'
       
       - name: Install dependencies
-        run: npm install rss-parser
+        run: npm install
       
       - name: Generate RSS
         run: |
           mkdir -p docs
           node merger.js
+          ls -la docs/  # Verify file creation
       
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
@@ -35,3 +36,4 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./docs
           keep_files: false
+          force_orphan: true

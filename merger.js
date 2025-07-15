@@ -1,5 +1,11 @@
-const Parser = require('rss-parser');
-const fs = require('fs');
+import Parser from 'rss-parser';
+import fs from 'fs';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+
+// Fix __dirname equivalent for ES Modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 const newsSources = [
   {
@@ -14,10 +20,7 @@ const newsSources = [
   }
 ];
 
-const parser = new Parser({
-  timeout: 10000,
-  headers: { 'User-Agent': 'Mozilla/5.0' }
-});
+const parser = new Parser();
 
 async function generateFeed() {
   const allItems = [];
@@ -41,7 +44,7 @@ async function generateFeed() {
   allItems.sort((a, b) => b.pubDate - a.pubDate);
 
   const rssFeed = buildRss(allItems);
-  fs.writeFileSync('./docs/merged-feed.rss', rssFeed);
+  fs.writeFileSync(`${__dirname}/docs/merged-feed.rss`, rssFeed);
 }
 
 function buildRss(items) {
@@ -49,7 +52,7 @@ function buildRss(items) {
 <rss version="2.0">
 <channel>
   <title>Merged Business News</title>
-  <link>https://your-username.github.io/my-merged-newsletters/</link>
+  <link>https://yourusername.github.io/my-merged-newsletters/</link>
   <description>Combined RSS feed</description>
   <lastBuildDate>${new Date().toUTCString()}</lastBuildDate>
   ${items.map(item => `
@@ -69,4 +72,4 @@ function escapeXml(unsafe) {
     ({ '<':'&lt;', '>':'&gt;', '&':'&amp;', '\'':'&apos;', '"':'&quot;' }[c]));
 }
 
-generateFeed();
+await generateFeed();

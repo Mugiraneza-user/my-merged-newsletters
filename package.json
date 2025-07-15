@@ -2,6 +2,9 @@
   "name": "my-merged-newsletters",
   "version": "1.0.0",
   "type": "module",
+  "dependencies": {
+    "rss-parser": "^3.13.0"
+  },
   "scripts": {
     "start": "node merger.js"
   }
